@@ -1,0 +1,218 @@
+Path: {WD: 'C:\Users\ResearchPC\Documents\YRB', Modules: 'C:\Users\ResearchPC\OneDrive\Lehigh\0_Proj2_UA-SA-Equifinality\NewCode'}
+WaterSystem:
+  StartDate: 1959/1/1
+  EndDate: 2013/12/31
+  NumSubbasins: 6
+  NumGauges: 3
+  NumAgents: 8
+  Outlets: [S1, S2, S3, C1, C2, G]
+  GaugedOutlets: [G, C1, C2]
+  GroupNodes:
+  - [C2, C1]
+  DataLength: 20089
+LSM:
+  Model: GWLF
+  S1:
+    Inputs: {Area: 83014.25, Latitude: 47.416, S0: 2.0, U0: 10.0, SnowS: 5.0}
+    Pars: {CN2: null, IS: null, Res: null, Sep: null, Alpha: null, Beta: null, Ur: null,
+      Df: null, Kc: null}
+  S2:
+    Inputs: {Area: 11601.47, Latitude: 46.814, S0: 2.0, U0: 10.0, SnowS: 5.0}
+    Pars: {CN2: null, IS: null, Res: null, Sep: null, Alpha: null, Beta: null, Ur: null,
+      Df: null, Kc: null}
+  S3:
+    Inputs: {Area: 28016.2, Latitude: 46.622, S0: 2.0, U0: 10.0, SnowS: 5.0}
+    Pars: {CN2: null, IS: null, Res: null, Sep: null, Alpha: null, Beta: null, Ur: null,
+      Df: null, Kc: null}
+  C1:
+    Inputs: {Area: 328818.7, Latitude: 47.145, S0: 8, U0: 10.0, SnowS: 5.0}
+    Pars: {CN2: 40.266374957048924, IS: 0.4777942101539341, Res: 0.06544448312670048,
+      Sep: 0.40725091070321334, Alpha: 0.005892596406003925, Beta: 0.19810647010010737,
+      Ur: 4.674316893837359, Df: 0.16637594975014924, Kc: 1.2475482561782154}
+  C2:
+    Inputs: {Area: 203799.79, Latitude: 46.839, S0: 6, U0: 10.0, SnowS: 5.0}
+    Pars: {CN2: 70.91352267195373, IS: 0.4039777193327126, Res: 0.04177651061515578,
+      Sep: 0.3878473387695252, Alpha: 0.04396968206448637, Beta: 0.29695611258630855,
+      Ur: 6.053715381005957, Df: 0.4410123722705372, Kc: 1.3810737626674046}
+  G:
+    Inputs: {Area: 291203.8, Latitude: 46.682, S0: 9, U0: 10.0, SnowS: 5.0}
+    Pars: {CN2: 71.29227817326182, IS: 0.11704030867838593, Res: 0.045350011127912836,
+      Sep: 0.20714365928411718, Alpha: 0.7951386022073615, Beta: 0.9632345195957549,
+      Ur: 2.4969536404151604, Df: 0.03342724072425023, Kc: 0.9769100883047219}
+Routing:
+  Model: Lohmann
+  G:
+    C1:
+      Inputs: {FlowLength: 59404.82, InstreamControl: false}
+      Pars: {GShape: 55.969096660628985, GRate: 31.902003537316144, Velo: 91.29030936974864,
+        Diff: 4446.813982274026}
+    C2:
+      Inputs: {FlowLength: 48847.74, InstreamControl: false}
+      Pars: {GShape: 97.46703089334035, GRate: 14.255819689566346, Velo: 14.813297776658281,
+        Diff: 4766.410043212318}
+    G:
+      Inputs: {FlowLength: 0, InstreamControl: false}
+      Pars: {GShape: 74.67598101738356, GRate: 4.077200233094532, Velo: null, Diff: null}
+  C1:
+    R1:
+      Inputs: {FlowLength: 100364.29, InstreamControl: true}
+      Pars: {GShape: null, GRate: null, Velo: 69.76153331426617, Diff: 1113.622712990191}
+    C1:
+      Inputs: {FlowLength: 0, InstreamControl: false}
+      Pars: {GShape: 10.308671134484602, GRate: 0.09668208536455557, Velo: null, Diff: null}
+  C2:
+    R2:
+      Inputs: {FlowLength: 70713.85, InstreamControl: true}
+      Pars: {GShape: null, GRate: null, Velo: 82.37191397680262, Diff: 3825.305248935484}
+    R3:
+      Inputs: {FlowLength: 36293.57, InstreamControl: true}
+      Pars: {GShape: null, GRate: null, Velo: 5.116933986857554, Diff: 857.8873955465557}
+    C2:
+      Inputs: {FlowLength: 0, InstreamControl: false}
+      Pars: {GShape: 91.77112122790285, GRate: 4.214373485678482, Velo: null, Diff: null}
+  S1:
+    S1:
+      Inputs: {FlowLength: 0, InstreamControl: false}
+      Pars: {GShape: null, GRate: null, Velo: null, Diff: null}
+  S2:
+    S2:
+      Inputs: {FlowLength: 0, InstreamControl: false}
+      Pars: {GShape: null, GRate: null, Velo: null, Diff: null}
+  S3:
+    S3:
+      Inputs: {FlowLength: 0, InstreamControl: false}
+      Pars: {GShape: null, GRate: null, Velo: null, Diff: null}
+ABM:
+  Inputs:
+    DamAgentTypes: [ResDam_AgType]
+    RiverDivAgentTypes: [IrrDiv_AgType, IrrDiv_RWS_AgType]
+    InsituAgentTypes: []
+    ConveyAgentTypes: []
+    DMClasses: [DivDM]
+    Modules: [YRB_ABM.py]
+    AgGroup:
+      IrrDiv_RWS_AgType:
+        RWS: [Roza, Wapato, Sunnyside]
+    BehaviorType: Adaptive
+    AdaptiveType: Quadratic
+    FlowTarget: [46.96, 54.97]
+    Database: C:\Users\ResearchPC\OneDrive\Lehigh\0_Proj2_UA-SA-Equifinality\YRBModel\INPUT\Database_1959_2013.csv
+  ResDam_AgType:
+    R1:
+      Attributes: {}
+      Inputs:
+        Piority: 0
+        Links: {S1: -1, R1: 1}
+      Pars: {L_U: null, L_L: null, Lr_c: null, Sig: null, a: null, b: null, c: null,
+        ProratedRatio: null}
+    R2:
+      Attributes: {}
+      Inputs:
+        Piority: 0
+        Links: {S2: -1, R2: 1}
+      Pars: {L_U: null, L_L: null, Lr_c: null, Sig: null, a: null, b: null, c: null,
+        ProratedRatio: null}
+    R3:
+      Attributes: {}
+      Inputs:
+        Piority: 0
+        Links: {S3: -1, R3: 1}
+      Pars: {L_U: null, L_L: null, Lr_c: null, Sig: null, a: null, b: null, c: null,
+        ProratedRatio: null}
+  IrrDiv_AgType:
+    Kittitas:
+      Attributes: {}
+      Inputs:
+        Piority: 1
+        Links: {C1: -0.5736279870645402}
+      Pars: {L_U: null, L_L: null, Lr_c: null, Sig: 0.6604212953456967, a: -15.924553806436446,
+        b: 34.65027305446998, c: -19.801084760147376, ProratedRatio: 0.549683051103041}
+    Tieton:
+      Attributes: {}
+      Inputs:
+        Piority: 1
+        Links: {C2: -1, G: 0.432944721164896}
+        DMClass: DivDM
+      Pars: {L_U: null, L_L: null, Lr_c: null, Sig: 0.31191173868377037, a: -5.404390185055444,
+        b: 1.3510696767254569, c: -2.4085172417099523, ProratedRatio: 0.9664213281211926}
+  IrrDiv_RWS_AgType:
+    Roza:
+      Attributes: {}
+      Inputs:
+        Piority: 1
+        Links: {G: -1}
+      Pars: {L_U: null, L_L: null, Lr_c: null, Sig: 0.8329601723023172, a: -15.0888742635033,
+        b: 29.31426162256217, c: -16.83496751818781, ProratedRatio: 0.44185593753740376}
+    Wapato:
+      Attributes: {}
+      Inputs:
+        Piority: 1
+        Links: {G: -1}
+      Pars: {L_U: null, L_L: null, Lr_c: null, Sig: 1.6686222741860468, a: -5.511603421960494,
+        b: 20.10992480551738, c: -14.13526581224433, ProratedRatio: 0.7267002611157574}
+    Sunnyside:
+      Attributes: {}
+      Inputs:
+        Piority: 1
+        Links: {G: -1}
+      Pars: {L_U: null, L_L: null, Lr_c: null, Sig: 0.5536185688119756, a: -10.024698507051255,
+        b: 16.704268443974087, c: -9.84182236154532, ProratedRatio: 0.5452076473284758}
+SystemParsedData:
+  SimSeq: [S2, S3, R3, R2, S1, R1, C2, C1, G]
+  AgSimSeq:
+    AgSimMinus:
+      S2: {}
+      S3: {}
+      R3: {}
+      R2: {}
+      S1: {}
+      R1: {}
+      C2:
+        RiverDivAgents:
+        - [Tieton, C2]
+      C1:
+        RiverDivAgents:
+        - [Kittitas, C1]
+      G:
+        RiverDivAgents:
+        - [RWS, G]
+    AgSimPlus:
+      S2: {}
+      S3: {}
+      R3:
+        DamAgents:
+        - [R3, R3]
+      R2:
+        DamAgents:
+        - [R2, R2]
+      S1: {}
+      R1:
+        DamAgents:
+        - [R1, R1]
+      C2: {}
+      C1: {}
+      G:
+        RiverDivAgents:
+        - [Tieton, G]
+  RoutingOutlets: [S2, S3, S1, C2, C1, G]
+  DamAgents: [R1, R2, R3]
+  RiverDivAgents: [Kittitas, Tieton, Roza, Wapato, Sunnyside]
+  InsituAgents: []
+  ConveyAgents: []
+  BackTrackingDict:
+    G: [C1, C2]
+    C1: [R1]
+    C2: [R2, R3]
+    R1: [S1]
+    R2: [S2]
+    R3: [S3]
+  Edges:
+  - [C1, G]
+  - [C2, G]
+  - [R1, C1]
+  - [R2, C2]
+  - [R3, C2]
+  - [S1, R1]
+  - [S2, R2]
+  - [S3, R3]
+  ConveyToNodes: []

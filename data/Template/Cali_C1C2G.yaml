@@ -1,0 +1,154 @@
+Path: {WD: 'C:\Users\ResearchPC\Documents\YRB', Modules: 'C:\Users\Philip\OneDrive\Lehigh\0_Proj2_UA-SA-Equifinality\NewCode'}
+WaterSystem:
+  StartDate: 1959/1/1
+  EndDate: 2013/12/31
+  NumSubbasins: 6
+  NumGauges: 3
+  NumAgents: 8
+  Outlets: [S1, S2, S3, C1, C2, G]
+  GaugedOutlets: [G, C1, C2]
+LSM:
+  Model: GWLF
+  S1:
+    Inputs: {Area: 83014.25, Latitude: 47.416, S0: 2.0, U0: 10.0, SnowS: 5.0}
+    Pars: {CN2: null, IS: null, Res: null, Sep: null, Alpha: null, Beta: null, Ur: null,
+      Df: null, Kc: null}
+  S2:
+    Inputs: {Area: 11601.47, Latitude: 46.814, S0: 2.0, U0: 10.0, SnowS: 5.0}
+    Pars: {CN2: null, IS: null, Res: null, Sep: null, Alpha: null, Beta: null, Ur: null,
+      Df: null, Kc: null}
+  S3:
+    Inputs: {Area: 28016.2, Latitude: 46.622, S0: 2.0, U0: 10.0, SnowS: 5.0}
+    Pars: {CN2: null, IS: null, Res: null, Sep: null, Alpha: null, Beta: null, Ur: null,
+      Df: null, Kc: null}
+  C1:
+    Inputs: {Area: 328818.7, Latitude: 47.145, S0: 8, U0: 10.0, SnowS: 5.0}
+    Pars: {CN2: -99, IS: -99, Res: -99, Sep: -99, Alpha: -99, Beta: -99, Ur: -99,
+      Df: -99, Kc: -99}
+  C2:
+    Inputs: {Area: 203799.79, Latitude: 46.839, S0: 6, U0: 10.0, SnowS: 5.0}
+    Pars: {CN2: -99, IS: -99, Res: -99, Sep: -99, Alpha: -99, Beta: -99, Ur: -99,
+      Df: -99, Kc: -99}
+  G:
+    Inputs: {Area: 291203.8, Latitude: 46.682, S0: 9, U0: 10.0, SnowS: 5.0}
+    Pars: {CN2: -99, IS: -99, Res: -99, Sep: -99, Alpha: -99, Beta: -99, Ur: -99,
+      Df: -99, Kc: -99}
+Routing:
+  Model: Lohmann
+  G:
+    C1:
+      Inputs: {FlowLength: 59404.82, InstreamControl: false}
+      Pars: {GShape: -99, GRate: -99, Velo: -99, Diff: -99}
+    C2:
+      Inputs: {FlowLength: 48847.74, InstreamControl: false}
+      Pars: {GShape: -99, GRate: -99, Velo: -99, Diff: -99}
+    G:
+      Inputs: {FlowLength: 0, InstreamControl: false}
+      Pars: {GShape: -99, GRate: -99, Velo: null, Diff: null}
+  C1:
+    R1:
+      Inputs: {FlowLength: 100364.29, InstreamControl: true}
+      Pars: {GShape: null, GRate: null, Velo: -99, Diff: -99}
+    C1:
+      Inputs: {FlowLength: 0, InstreamControl: false}
+      Pars: {GShape: -99, GRate: -99, Velo: null, Diff: null}
+  C2:
+    R2:
+      Inputs: {FlowLength: 70713.85, InstreamControl: true}
+      Pars: {GShape: null, GRate: null, Velo: -99, Diff: -99}
+    R3:
+      Inputs: {FlowLength: 36293.57, InstreamControl: true}
+      Pars: {GShape: null, GRate: null, Velo: -99, Diff: -99}
+    C2:
+      Inputs: {FlowLength: 0, InstreamControl: false}
+      Pars: {GShape: -99, GRate: -99, Velo: null, Diff: null}
+  S1:
+    S1:
+      Inputs: {FlowLength: 0, InstreamControl: false}
+      Pars: {GShape: null, GRate: null, Velo: null, Diff: null}
+  S2:
+    S2:
+      Inputs: {FlowLength: 0, InstreamControl: false}
+      Pars: {GShape: null, GRate: null, Velo: null, Diff: null}
+  S3:
+    S3:
+      Inputs: {FlowLength: 0, InstreamControl: false}
+      Pars: {GShape: null, GRate: null, Velo: null, Diff: null}
+
+ABM:
+  Inputs:
+    DamAgentTypes: [ResDam_AgType]
+    RiverDivAgentTypes: [IrrDiv_AgType, IrrDiv_RWS_AgType]
+    InsituAgentTypes: []
+    ConveyAgentTypes: []
+    DMClasses: []
+    Modules: [YRB_ABM_C1C2G.py]
+    AgGroup:
+      IrrDiv_RWS_AgType:
+        RWS: [Roza, Wapato, Sunnyside]
+  ResDam_AgType:
+    R1:
+      Attributes: {}
+      Inputs:
+        Piority: 0
+        Links: {S1: -1, R1: 1}
+      Pars: null
+    R2:
+      Attributes:
+        ObvDfPath: {}
+      Inputs:
+        Piority: 0
+        Links: {S2: -1, R2: 1}
+      Pars: null
+    R3:
+      Attributes:
+        ObvDfPath: {}
+      Inputs:
+        Piority: 0
+        Links: {S3: -1, R3: 1}
+      Pars: null
+  IrrDiv_AgType:
+    Kittitas:
+      Attributes:
+        ObvDfPath: {}
+      Inputs:
+        Piority: 1
+        Links:
+          C1: [DivFactor, 0, Minus]
+      Pars:
+        DivFactor: [-99]
+    Tieton:
+      Attributes:
+        ObvDfPath: {}
+      Inputs:
+        Piority: 1
+        Links:
+          C2: -1
+          G: [ReturnFactor, 0, Plus]
+      Pars:
+        ReturnFactor: [-99]
+  IrrDiv_RWS_AgType:
+    Roza:
+      Attributes:
+        ObvDfPath: {}
+      Inputs:
+        Piority: 1
+        Links: {G: -1}
+      Pars:
+        ReturnFactor: []
+    Wapato:
+      Attributes:
+        ObvDfPath: {}
+      Inputs:
+        Piority: 1
+        Links: {G: -1}
+      Pars:
+        ReturnFactor: []
+    Sunnyside:
+      Attributes:
+        ObvDfPath: {}
+      Inputs:
+        Piority: 1
+        Links: {G: -1}
+      Pars:
+        ReturnFactor: []

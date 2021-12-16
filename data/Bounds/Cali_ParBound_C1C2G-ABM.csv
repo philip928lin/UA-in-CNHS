@@ -1,0 +1,3 @@
+,"('R1', 'ResDam_AgType')","('R2', 'ResDam_AgType')","('R3', 'ResDam_AgType')","('Kittitas', 'IrrDiv_AgType')","('Tieton', 'IrrDiv_AgType')","('Roza', 'IrrDiv_RWS_AgType')","('Wapato', 'IrrDiv_RWS_AgType')","('Sunnyside', 'IrrDiv_RWS_AgType')"
+DivFactor.0,,,,"[-1,-0.5]",,,,
+ReturnFactor.0,,,,,"[0,0.5]",,,

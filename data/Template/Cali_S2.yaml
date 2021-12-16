@@ -1,0 +1,21 @@
+Path: {WD: 'C:\Users\Philip\Documents\Proj2HydroCNHS\S1S2S3'}
+WaterSystem:
+  StartDate: 1959/1/1
+  EndDate: 2013/12/31
+  NumSubbasins: 1
+  NumGauges: 1
+  NumAgents: 0
+  Outlets: [S2]
+  GaugedOutlets: [S2]
+LSM:
+  Model: GWLF
+  S2:
+    Inputs: {Area: 11601.47, Latitude: 46.814, S0: 1.77, U0: 10.0, SnowS: 5.0}
+    Pars: {CN2: -99, IS: -99, Res: -99, Sep: -99, Alpha: -99, Beta: -99, Ur: -99,
+      Df: -99, Kc: -99}
+Routing:
+  Model: Lohmann
+  S2:
+    S2:
+      Inputs: {FlowLength: 0, InstreamControl: false}
+      Pars: {GShape: -99, GRate: -99, Velo: null, Diff: null}

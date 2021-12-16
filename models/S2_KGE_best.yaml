@@ -1,0 +1,34 @@
+Path: {WD: 'C:\Users\ResearchPC\Documents\YRB'}
+WaterSystem:
+  StartDate: 1959/1/1
+  EndDate: 2013/12/31
+  NumSubbasins: 1
+  NumGauges: 1
+  NumAgents: 0
+  Outlets: [S2]
+  GaugedOutlets: [S2]
+  DataLength: 20089
+LSM:
+  Model: GWLF
+  S2:
+    Inputs: {Area: 11601.47, Latitude: 46.814, S0: 1.77, U0: 10.0, SnowS: 5.0}
+    Pars: {CN2: 56.05638723665325, IS: 0.17036796622243755, Res: 0.17052786906463446,
+      Sep: 0.3253750321197482, Alpha: 0.011756087082961266, Beta: 0.16703529520364616,
+      Ur: 11.875912569180583, Df: 0.5429162220200362, Kc: 0.5637494203952521}
+Routing:
+  Model: Lohmann
+  S2:
+    S2:
+      Inputs: {FlowLength: 0, InstreamControl: false}
+      Pars: {GShape: 18.836696859830717, GRate: 0.41041667146718697, Velo: null, Diff: null}
+SystemParsedData:
+  SimSeq: [S2]
+  AgSimSeq: null
+  RoutingOutlets: [S2]
+  DamAgents: null
+  RiverDivAgents: null
+  InsituAgents: null
+  ConveyAgents: null
+  BackTrackingDict: {}
+  Edges: []
+  ConveyToNodes: []
