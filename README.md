@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/439128045.svg)](https://zenodo.org/badge/latestdoi/439128045)
+
 # The effects of model complexity on model output uncertainty in co-evolved coupled natural–human systems
 
 This is the code archive for the publication "The effects of model complexity on model output uncertainty in co-evolved coupled natural–human systems" in Earth's Future.
