@@ -8,14 +8,14 @@ import HydroCNHS.calibration as cali
 # =============================================================================
 # Path setting
 # =============================================================================
-pc = ""
-path = r"".format(pc)
-wd = r"".format(pc)
-module_path = os.path.join(path, r"")
-csv_path = os.path.join(path, "")
-input_path = os.path.join(path, r"")
-bound_path = os.path.join(path, r"")
-best_model_output_path = os.path.join(wd, "")
+
+path = r""
+wd = r""
+module_path = r""
+csv_path = r""
+input_path = r""
+bound_path = r""
+best_model_output_path = r""
 
 # =============================================================================
 # Load Weather Data & Obv_M & ObvY
@@ -46,6 +46,9 @@ model_dict = HydroCNHS.load_model(model_path)
 model_dict["Path"]["WD"] = wd
 model_dict["Path"]["Modules"] = module_path
 
+
+# model = HydroCNHS.Model(model_dict)
+# Q = model.run(temp, prec, pet, assigned_Q=assigned_Q)
 #%%
 # =============================================================================
 # Create Formatter & Calibration Inputs.
@@ -137,7 +140,9 @@ def evaluation(individual, info):
         f.write(df.to_string(header=False, index=True))
 
     # We weight mean_Y_shortage to 10. Should not have shortage.
+    #fitness = df_cali_Q_M.loc["Mean", "KGE"] + df_vali_Q_Y.loc["G789", "KGE"] + (1 - mean_Y_shortage)*10
     fitness = df_cali_Q_M.loc["Mean", "KGE"] + (1 - mean_Y_shortage)*10
+               #+ df_cali_Q_M.loc["Mean", "iKGE"]) / 2
     return (fitness,)
 
 #%% =============================================================================
@@ -157,7 +162,7 @@ config = {'min_or_max': 'max',
          'auto_save': True,
          'print_level': 1,
          'plot': True}
-for seed in [83, 9, 28]:
+for seed in [13, 17, 19, 23, 29, 31, 37]:#[83, 9, 28, 3, 2]:
     rn_gen = HydroCNHS.create_rn_gen(seed)
     ga = cali.GA_DEAP(evaluation, rn_gen)
     ga.set(cali_inputs, config, formatter, name="Cali_C1C2G_KGE_{}".format(seed))
@@ -171,4 +176,5 @@ for seed in [83, 9, 28]:
         model = HydroCNHS.load_df_to_model_dict(model, df, s, "Pars")
     HydroCNHS.write_model(model, os.path.join(best_model_output_path,
                                               "C1C2G_KGE_{}.yaml".format(seed)))
+
 

@@ -5,12 +5,11 @@ from tqdm import tqdm
 import pickle
 import matplotlib.pyplot as plt
 from copy import deepcopy
-pc = ""
-path = r"".format(pc)
-os.chdir(os.path.join(path, ""))
-from decomposition_funcs import get_EV, get_VE, get_EVE, get_EV2
+path = r""
+os.chdir(os.path.join(path, "code"))
+from decomposition_funcs import get_EV, get_VE, get_EVE, get_EV2, get_VE_EV, get_VE_VE
 
-sc_result_path = os.path.join(path, "")
+sc_result_path = r""
 
 # Sc settings
 num_iter = 30
@@ -102,24 +101,29 @@ for ite in range(1, num_iter+1):
                       "Rm": df_Rm,
                       "Qm": df_Qm,
                       "Sm": df_Sm}
-pickle.dump(sc_dict, open(os.path.join(
+pickle.dump(indicator, open(os.path.join(
     sc_result_path, "Sc_indicator_{}iter.p".format(num_iter)), "wb"))
 print("Done!")
 
 #%%
+
 def vd(indicator, item, save=True):
     vd = {}
     df_cli = pd.DataFrame()
     df_int = pd.DataFrame()
     df_equ = pd.DataFrame()
-    for ite in range(1, num_iter+1):
+    df_equ_abm = pd.DataFrame()
+    df_equ_hy = pd.DataFrame()
+    for ite in tqdm(range(1, num_iter+1), desc="vd_{}".format(item)):
         # Didn't use copy(). This will override the data in indicator but it is fine.
         df = indicator[ite][item]
         df.columns = list(np.arange(1, 81, 1).astype(int))
         df_cli = pd.concat([df_cli, get_EV2(df)])
         df_int = pd.concat([df_int, get_EVE(df)])
         df_equ = pd.concat([df_equ, get_VE(df)])
-    vd = {"cli": df_cli, "int": df_int, "equ": df_equ}
+        df_equ_abm = pd.concat([df_equ_abm, get_VE_EV(df)])
+        df_equ_hy = pd.concat([df_equ_hy, get_VE_VE(df)])
+    vd = {"cli": df_cli, "int": df_int, "equ": df_equ, "equ_abm": df_equ_abm, "equ_hy": df_equ_hy}
     if save:
         pickle.dump(vd, open(os.path.join(
             sc_result_path, "Sc_vd_{}_{}iter.p".format(item, num_iter)), "wb"))
@@ -142,11 +146,13 @@ Sm_mean.columns = list(np.arange(1, 81, 1).astype(int))
 vd = deepcopy(Qm_vd)
 start = 11
 rcp_label = ""
-ylim=[0,235]
+ylim=[0,200]
 
 cli_mean = vd["cli"].groupby(vd["cli"].index).mean()
 int_mean = vd["int"].groupby(vd["int"].index).mean()
 equ_mean = vd["equ"].groupby(vd["equ"].index).mean()
+equ_abm_mean = vd["equ_abm"].groupby(vd["equ_abm"].index).mean()
+equ_hy_mean = vd["equ_hy"].groupby(vd["equ_hy"].index).mean()
 
 # cli_std = vd["cli"].groupby(vd["cli"].index).std()
 # int_std = (vd["cli"]+vd["int"]).groupby(vd["int"].index).std()
@@ -156,6 +162,8 @@ total = cli_mean + int_mean + equ_mean
 cli_p = cli_mean / total * 100
 int_p = int_mean / total * 100
 equ_p = equ_mean / total * 100
+equ_abm_p = equ_abm_mean / total * 100
+equ_hy_p = equ_hy_mean / total * 100
 
 fig, axes = plt.subplots(nrows=3, ncols=5, sharey='row', sharex=False,
                          figsize=(8,7.5), gridspec_kw={
@@ -165,21 +173,31 @@ axes = axes.flatten()
 
 cm = plt.cm.get_cmap('tab20c').colors
 # 0: royalblue, 5: orange, 10: lightgreen
-colors = [cm[0], cm[5], cm[10]]
+#colors = [cm[0], cm[5], cm[10]
+colors = [cm[0], cm[5], cm[10], cm[9]]
 plt.subplots_adjust(wspace=0.1, hspace=0.05)
 axes = axes.flatten()
 
 x = list(np.arange(start, 81, 1).astype(int))
 for i, agtype in enumerate(agtype_list):
     ax = axes[i]
+    # ax.stackplot(x,
+    #              cli_mean.loc[[agtype], x],
+    #              int_mean.loc[[agtype], x],
+    #              equ_mean.loc[[agtype], x],
+    #              labels=[r'Climate change scenario {}'.format(rcp_label),
+    #                      'Internal climate variability', 'Equifinality'],
+    #              colors=colors)
     ax.stackplot(x,
                  cli_mean.loc[[agtype], x],
                  int_mean.loc[[agtype], x],
-                 equ_mean.loc[[agtype], x],
+                 equ_hy_mean.loc[[agtype], x],
+                 equ_abm_mean.loc[[agtype], x],
                  labels=[r'Climate change scenario {}'.format(rcp_label),
-                         'Internal climate variability', 'Equifinality'],
+                         'Internal climate variability',
+                         '$Config_{HydroEMR}$',
+                         '$Config_{ABMEMR}$'],
                  colors=colors)
-
     ax.set_xlim([start,80])
     # ax.set_xticks([11,31,51,71])
     # ax.set_xticklabels(['2030s','2050s','2070s','2090s'], rotation=23)
@@ -195,12 +213,22 @@ for i, agtype in enumerate(agtype_list):
 
     # Percentage
     ax = axes[i+5]
+    # ax.stackplot(x,
+    #              cli_p.loc[[agtype], x],
+    #              int_p.loc[[agtype], x],
+    #              equ_p.loc[[agtype], x],
+    #              labels=[r'Climate change scenario {}'.format(rcp_label),
+    #                      'Internal climate variability', 'Equifinality'],
+    #              colors=colors)
     ax.stackplot(x,
                  cli_p.loc[[agtype], x],
                  int_p.loc[[agtype], x],
-                 equ_p.loc[[agtype], x],
+                 equ_hy_p.loc[[agtype], x],
+                 equ_abm_p.loc[[agtype], x],
                  labels=[r'Climate change scenario {}'.format(rcp_label),
-                         'Internal climate variability', 'Equifinality'],
+                         'Internal climate variability',
+                         '$Config_{HydroEMR}$',
+                         '$Config_{ABMEMR}$'],
                  colors=colors)
     ax.set_xlim([start,80])
     # ax.set_xticks([11,31,51,71])
@@ -241,7 +269,7 @@ plt.tick_params(labelcolor='none', top=False, bottom=False,
                 left=False, right=False)
 plt.grid(False)
 le = plt.legend(handles[::-1], labels[::-1], title="Uncertainty Sources",
-                loc="upper right", framealpha=1, fontsize=12)
+                loc="upper right", framealpha=1, fontsize=12, ncol=2)
 le.get_title().set_fontsize('12')
 plt.xlabel("\nYear", fontsize=14)
 #%%
@@ -259,6 +287,8 @@ ylim=[0,30]
 cli_mean = vd["cli"].groupby(vd["cli"].index).mean()
 int_mean = vd["int"].groupby(vd["int"].index).mean()
 equ_mean = vd["equ"].groupby(vd["equ"].index).mean()
+equ_abm_mean = vd["equ_abm"].groupby(vd["equ_abm"].index).mean()
+equ_hy_mean = vd["equ_hy"].groupby(vd["equ_hy"].index).mean()
 
 # cli_std = vd["cli"].groupby(vd["cli"].index).std()
 # int_std = (vd["cli"]+vd["int"]).groupby(vd["int"].index).std()
@@ -268,6 +298,8 @@ total = cli_mean + int_mean + equ_mean
 cli_p = cli_mean / total * 100
 int_p = int_mean / total * 100
 equ_p = equ_mean / total * 100
+equ_abm_p = equ_abm_mean / total * 100
+equ_hy_p = equ_hy_mean / total * 100
 
 fig, axes = plt.subplots(nrows=3, ncols=5, sharey='row', sharex=False,
                          figsize=(8,7.5), gridspec_kw={
@@ -277,21 +309,31 @@ axes = axes.flatten()
 
 cm = plt.cm.get_cmap('tab20c').colors
 # 0: royalblue, 5: orange, 10: lightgreen
-colors = [cm[0], cm[5], cm[10]]
+#colors = [cm[0], cm[5], cm[10]
+colors = [cm[0], cm[5], cm[10], cm[9]]
 plt.subplots_adjust(wspace=0.1, hspace=0.05)
 axes = axes.flatten()
 
 x = list(np.arange(start, 81, 1).astype(int))
 for i, agtype in enumerate(agtype_list):
     ax = axes[i]
+    # ax.stackplot(x,
+    #              cli_mean.loc[[agtype], x],
+    #              int_mean.loc[[agtype], x],
+    #              equ_mean.loc[[agtype], x],
+    #              labels=[r'Climate change scenario {}'.format(rcp_label),
+    #                      'Internal climate variability', 'Equifinality'],
+    #              colors=colors)
     ax.stackplot(x,
                  cli_mean.loc[[agtype], x],
                  int_mean.loc[[agtype], x],
-                 equ_mean.loc[[agtype], x],
+                 equ_hy_mean.loc[[agtype], x],
+                 equ_abm_mean.loc[[agtype], x],
                  labels=[r'Climate change scenario {}'.format(rcp_label),
-                         'Internal climate variability', 'Equifinality'],
+                         'Internal climate variability',
+                         '$Config_{HydroEMR}$',
+                         '$Config_{ABMEMR}$'],
                  colors=colors)
-
     ax.set_xlim([start,80])
     # ax.set_xticks([11,31,51,71])
     # ax.set_xticklabels(['2030s','2050s','2070s','2090s'], rotation=23)
@@ -307,12 +349,22 @@ for i, agtype in enumerate(agtype_list):
 
     # Percentage
     ax = axes[i+5]
+    # ax.stackplot(x,
+    #              cli_p.loc[[agtype], x],
+    #              int_p.loc[[agtype], x],
+    #              equ_p.loc[[agtype], x],
+    #              labels=[r'Climate change scenario {}'.format(rcp_label),
+    #                      'Internal climate variability', 'Equifinality'],
+    #              colors=colors)
     ax.stackplot(x,
                  cli_p.loc[[agtype], x],
                  int_p.loc[[agtype], x],
-                 equ_p.loc[[agtype], x],
+                 equ_hy_p.loc[[agtype], x],
+                 equ_abm_p.loc[[agtype], x],
                  labels=[r'Climate change scenario {}'.format(rcp_label),
-                         'Internal climate variability', 'Equifinality'],
+                         'Internal climate variability',
+                         '$Config_{HydroEMR}$',
+                         '$Config_{ABMEMR}$'],
                  colors=colors)
     ax.set_xlim([start,80])
     # ax.set_xticks([11,31,51,71])
@@ -340,124 +392,135 @@ plt.tick_params(labelcolor='none', top=False, bottom=False,
                 left=False, right=False)
 plt.grid(False)
 le = plt.legend(handles[::-1], labels[::-1], title="Uncertainty Sources",
-                loc="upper left", framealpha=1, fontsize=12)
+                loc="upper left", framealpha=1, fontsize=12, ncol=1)
 le.get_title().set_fontsize('12')
 plt.xlabel("\nYear", fontsize=14)
 
 
 #%%
+# For proposal
+vd = deepcopy(Qm_vd)
+cli_mean_Qm = vd["cli"].groupby(vd["cli"].index).mean()
+int_mean_Qm = vd["int"].groupby(vd["int"].index).mean()
+equ_mean_Qm = vd["equ"].groupby(vd["equ"].index).mean()
+equ_abm_mean_Qm = vd["equ_abm"].groupby(vd["equ_abm"].index).mean()
+equ_hy_mean_Qm = vd["equ_hy"].groupby(vd["equ_hy"].index).mean()
+total_Qm = cli_mean_Qm + int_mean_Qm + equ_mean_Qm
 
-# vd = deepcopy(Qm_vd)
-# cli_mean_Qm = vd["cli"].groupby(vd["cli"].index).mean()
-# int_mean_Qm = vd["int"].groupby(vd["int"].index).mean()
-# equ_mean_Qm = vd["equ"].groupby(vd["equ"].index).mean()
-# total_Qm = cli_mean_Qm + int_mean_Qm + equ_mean_Qm
+vd = deepcopy(Dm_vd)
+start = 11
+rcp_label = ""
 
-# vd = deepcopy(Dm_vd)
-# start = 11
-# rcp_label = ""
-
-# cli_mean_Dm = vd["cli"].groupby(vd["cli"].index).mean()
-# int_mean_Dm = vd["int"].groupby(vd["int"].index).mean()
-# equ_mean_Dm = vd["equ"].groupby(vd["equ"].index).mean()
-# total_Dm = cli_mean_Dm + int_mean_Dm + equ_mean_Dm
+cli_mean_Dm = vd["cli"].groupby(vd["cli"].index).mean()
+int_mean_Dm = vd["int"].groupby(vd["int"].index).mean()
+equ_mean_Dm = vd["equ"].groupby(vd["equ"].index).mean()
+equ_abm_mean_Dm = vd["equ_abm"].groupby(vd["equ_abm"].index).mean()
+equ_hy_mean_Dm = vd["equ_hy"].groupby(vd["equ_hy"].index).mean()
+total_Dm = cli_mean_Dm + int_mean_Dm + equ_mean_Dm
 
 
-# fig, axes = plt.subplots(nrows=3, ncols=5, sharey='row', sharex=False,
-#                          figsize=(8,7.5), gridspec_kw={
-#                              'width_ratios': [1, 1, 1, 1, 1],
-#                              'height_ratios': [1.5, 1.5, 1]})
-# axes = axes.flatten()
+fig, axes = plt.subplots(nrows=3, ncols=5, sharey='row', sharex=False,
+                         figsize=(8,7.5), gridspec_kw={
+                             'width_ratios': [1, 1, 1, 1, 1],
+                             'height_ratios': [1.5, 1.5, 1]})
+axes = axes.flatten()
 
-# cm = plt.cm.get_cmap('tab20c').colors
-# # 0: royalblue, 5: orange, 10: lightgreen
+cm = plt.cm.get_cmap('tab20c').colors
+# 0: royalblue, 5: orange, 10: lightgreen
 # colors = [cm[0], cm[5], cm[10]]
-# plt.subplots_adjust(wspace=0.1, hspace=0.05)
-# axes = axes.flatten()
+colors = [cm[0], cm[5], cm[10], cm[9]]
+plt.subplots_adjust(wspace=0.1, hspace=0.05)
+axes = axes.flatten()
 
-# x = list(np.arange(start, 81, 1).astype(int))
-# for i, agtype in enumerate(agtype_list):
-#     ax = axes[i]
-#     ax.stackplot(x,
-#                  cli_mean_Qm.loc[[agtype], x],
-#                  int_mean_Qm.loc[[agtype], x],
-#                  equ_mean_Qm.loc[[agtype], x],
-#                  labels=[r'Climate change scenario {}'.format(rcp_label),
-#                          'Internal climate variability', 'Equifinality'],
-#                  colors=colors)
+x = list(np.arange(start, 81, 1).astype(int))
+for i, agtype in enumerate(agtype_list):
+    ax = axes[i]
+    ax.stackplot(x,
+                 cli_mean_Qm.loc[[agtype], x],
+                 int_mean_Qm.loc[[agtype], x],
+                 equ_hy_mean_Qm.loc[[agtype], x],
+                 equ_abm_mean_Qm.loc[[agtype], x],
+                 labels=[r'Climate change scenario {}'.format(rcp_label),
+                         'Internal climate variability',
+                         '$Equifinality_{HydroEMR}$',
+                         '$Equifinality_{ABMEMR}$'],
+                 colors=colors)
 
-#     ax.set_xlim([start,80])
-#     # ax.set_xticks([11,31,51,71])
-#     # ax.set_xticklabels(['2030s','2050s','2070s','2090s'], rotation=23)
-#     if agtype == ('Static', 'Linear'):
-#         ax.set_ylabel(
-#             "Model uncertainty\nvariance of $Q_M$\n$(m^3/sec)^2$",
-#             fontsize = 14)
-#     if agtype == ('Learning', 'Quadratic'):
-#         handles, labels = ax.get_legend_handles_labels()
+    ax.set_xlim([start,80])
+    # ax.set_xticks([11,31,51,71])
+    # ax.set_xticklabels(['2030s','2050s','2070s','2090s'], rotation=23)
+    if agtype == ('Static', 'Linear'):
+        ax.set_ylabel(
+            "Model uncertainty\nvariance of $Q_M$\n$(m^3/sec)^2$",
+            fontsize = 14)
+    if agtype == ('Learning', 'Quadratic'):
+        handles, labels = ax.get_legend_handles_labels()
 
-#     ax.set_title(name_dict[agtype], fontsize=14)
-#     ylim=[0,235]
-#     ax.set_ylim(ylim)
+    ax.set_title(name_dict[agtype], fontsize=14)
+    ylim=[0,150]
+    ax.set_ylim(ylim)
 
-#     # Dm
-#     ax = axes[i+5]
-#     ax.stackplot(x,
-#                  cli_mean_Dm.loc[[agtype], x],
-#                  int_mean_Dm.loc[[agtype], x],
-#                  equ_mean_Dm.loc[[agtype], x],
-#                  labels=[r'Climate change scenario {}'.format(rcp_label),
-#                          'Internal climate variability', 'Equifinality'],
-#                  colors=colors)
+    # Dm
+    ax = axes[i+5]
+    ax.stackplot(x,
+                 cli_mean_Dm.loc[[agtype], x],
+                 int_mean_Dm.loc[[agtype], x],
+                 equ_hy_mean_Dm.loc[[agtype], x],
+                 equ_abm_mean_Dm.loc[[agtype], x],
+                 labels=[r'Climate change scenario {}'.format(rcp_label),
+                         'Internal climate variability',
+                         '$Equifinality_{HydroEMR}$',
+                         '$Equifinality_{ABMEMR}$'],
+                 colors=colors)
 
-#     ax.set_xlim([start,80])
-#     # ax.set_xticks([11,31,51,71])
-#     # ax.set_xticklabels(['2030s','2050s','2070s','2090s'], rotation=23)
-#     if agtype == ('Static', 'Linear'):
-#         ax.set_ylabel(
-#             "Model uncertainty\nvariance of $D_M$\n$(m^3/sec)^2$",
-#             fontsize = 14)
-#     if agtype == ('Learning', 'Quadratic'):
-#         handles, labels = ax.get_legend_handles_labels()
+    ax.set_xlim([start,80])
+    # ax.set_xticks([11,31,51,71])
+    # ax.set_xticklabels(['2030s','2050s','2070s','2090s'], rotation=23)
+    if agtype == ('Static', 'Linear'):
+        ax.set_ylabel(
+            "Model uncertainty\nvariance of $D_M$\n$(m^3/sec)^2$",
+            fontsize = 14)
+    if agtype == ('Learning', 'Quadratic'):
+        handles, labels = ax.get_legend_handles_labels()
 
-#     #ax.set_title(name_dict[agtype], fontsize=14)
-#     ylim=[0,30]
-#     ax.set_ylim(ylim)
+    #ax.set_title(name_dict[agtype], fontsize=14)
+    ylim=[0,30]
+    ax.set_ylim(ylim)
 
 
-#     ax = axes[i+10]
-#     bt, at = agtype
-#     mask = [True if (bt0==bt and rcp0==rcp and at0==at) else False \
-#         for (rcp0,prec_q,temp_q,hy,abm,bt0,at0) in Sm_mean.index]
-#     df_Sm_ag = Sm_mean.loc[mask,start:]
-#     df_Sm_ag.columns = list(np.arange(-0, 80-start+1, 1).astype(int))
-#     df_Sm_ag.plot.box(legend=False, ylim=[0,20], ax=ax,
-#                            flierprops=dict(markersize=0.2, linewidth=0.1),
-#                            boxprops=dict(linestyle='-', linewidth=0.1),
-#                            medianprops=dict(linestyle='-', linewidth=0.1),
-#                            whiskerprops=dict(linestyle='-', linewidth=0.1),
-#                            capprops=dict(linestyle='-', linewidth=0.1))
+    ax = axes[i+10]
+    bt, at = agtype
+    mask = [True if (bt0==bt and rcp0==rcp and at0==at) else False \
+        for (rcp0,prec_q,temp_q,hy,abm,bt0,at0) in Sm_mean.index]
+    df_Sm_ag = Sm_mean.loc[mask,start:]
+    df_Sm_ag.columns = list(np.arange(-0, 80-start+1, 1).astype(int))
+    df_Sm_ag.plot.box(legend=False, ylim=[0,20], ax=ax,
+                           flierprops=dict(markersize=0.2, linewidth=0.1),
+                           boxprops=dict(linestyle='-', linewidth=0.1),
+                           medianprops=dict(linestyle='-', linewidth=0.1),
+                           whiskerprops=dict(linestyle='-', linewidth=0.1),
+                           capprops=dict(linestyle='-', linewidth=0.1))
 
-#     ax.plot(df_Sm_ag.mean())
-#     ax.axhline(10, color="grey", lw=0.5)
-#     ax.set_xlim([0,80-start])
-#     ax.set_xticks([0,20,40,60])
-#     ax.set_xticklabels(['2030s','2050s','2070s','2090s'], rotation=30)
-#     if agtype == ('Static', 'Linear'):
-#         ax.set_ylabel(
-#             "Shortage\nfrequecy, $S_M$\n(max=20)",
-#             fontsize = 14)
+    ax.plot(df_Sm_ag.mean())
+    ax.axhline(10, color="grey", lw=0.5)
+    ax.set_xlim([0,80-start])
+    ax.set_xticks([0,20,40,60])
+    ax.set_xticklabels(['2030s','2050s','2070s','2090s'], rotation=30)
+    if agtype == ('Static', 'Linear'):
+        ax.set_ylabel(
+            "Shortage\nfrequecy, $S_M$\n(max=20)",
+            fontsize = 14)
 
-# fig.add_subplot(111, frameon=False)
-# fig.align_ylabels(axes)
-# # hide tick and tick label of the big axes
-# plt.tick_params(labelcolor='none', top=False, bottom=False,
-#                 left=False, right=False)
-# plt.grid(False)
-# le = plt.legend(handles[::-1], labels[::-1], title="Uncertainty Sources",
-#                 loc="upper right", framealpha=1, fontsize=10)
-# le.get_title().set_fontsize('12')
-# plt.xlabel("\nYear", fontsize=14)
+fig.add_subplot(111, frameon=False)
+fig.align_ylabels(axes)
+# hide tick and tick label of the big axes
+plt.tick_params(labelcolor='none', top=False, bottom=False,
+                left=False, right=False)
+plt.grid(False)
+le = plt.legend(handles[::-1], labels[::-1], title="Uncertainty Sources",
+                loc="center left", framealpha=1, fontsize=10, ncol=1)
+le.get_title().set_fontsize('12')
+plt.xlabel("\nYear", fontsize=14)
 
 
 
